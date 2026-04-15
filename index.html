@@ -200,58 +200,6 @@
       text-shadow: 0 0 20px rgba(255, 210, 0, .6);
     }
 
-    /* ---- Verify seed section ---- */
-    .verify-section {
-      margin-top: 8px;
-      text-align: center;
-    }
-
-    .verify-section summary {
-      cursor: pointer;
-      color: #aaa;
-      font-size: .85rem;
-    }
-
-    .verify-section summary:hover {
-      color: #ffd200;
-    }
-
-    .verify-inputs {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .verify-inputs input {
-      font-family: 'Nunito', sans-serif;
-      padding: 8px 14px;
-      border-radius: 10px;
-      border: 2px solid #555;
-      background: rgba(255, 255, 255, .06);
-      color: #fff;
-      font-size: .95rem;
-      width: 200px;
-    }
-
-    .verify-inputs input:focus {
-      border-color: #ffd200;
-      outline: none;
-    }
-
-    .verify-inputs button {
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      padding: 8px 18px;
-      border-radius: 10px;
-      border: none;
-      background: #ffd200;
-      color: #302b63;
-      cursor: pointer;
-      font-size: .95rem;
-    }
-
     /* ---- Names panel ---- */
     .names-col {
       display: flex;
@@ -433,15 +381,6 @@
           <div style="font-size:.75rem;color:#888;margin-top:4px;">Scan to reproduce this spin</div>
         </div>
       </div>
-
-      <details class="verify-section">
-        <summary>🔍 Verify a spin result</summary>
-        <div class="verify-inputs">
-          <input type="text" id="verifySeed" placeholder="Paste seed here">
-          <button onclick="verifySpin()">Verify</button>
-        </div>
-        <div id="verifyResult" style="margin-top:8px; font-size:.9rem;"></div>
-      </details>
     </div>
 
     <!-- Names column -->
@@ -822,37 +761,7 @@
       }
     });
 
-    // ========== Verify ==========
-    function verifySpin() {
-      const seedStr = document.getElementById('verifySeed').value.trim();
-      const resultDiv = document.getElementById('verifyResult');
-
-      if (!seedStr || isNaN(Number(seedStr))) {
-        resultDiv.innerHTML = '<span style="color:#f44">Please enter a valid numeric seed.</span>';
-        return;
-      }
-
-      const seed = Number(seedStr);
-      const rng = mulberry32(seed);
-      rng(); rng(); rng();
-
-      const totalRotations = 5 + Math.floor(rng() * 5);
-      const extraAngle = rng() * Math.PI * 2;
-      const totalAngle = totalRotations * Math.PI * 2 + extraAngle;
-
-      // Simulate from angle 0 (verification assumes fresh start — we show what the result would be)
-      const finalAngle = totalAngle;
-      const sliceAngle = (Math.PI * 2) / names.length;
-      let normalizedAngle = ((finalAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-      let pointerAngle = (Math.PI * 2 - normalizedAngle) % (Math.PI * 2);
-      let index = Math.floor(pointerAngle / sliceAngle) % names.length;
-
-      resultDiv.innerHTML = `<span style="color:#4ECDC4">With seed <strong>${seed}</strong> and current ${names.length} names:<br>` +
-        `Winner would be: <strong style="color:#ffd200">${names[index]}</strong> (slot #${index + 1})</span><br>` +
-        `<span style="color:#888;font-size:.8rem">Note: Verification assumes the wheel starts from angle 0 with the current name list in order.</span>`;
-    }
-
-    // ========== Name management ==========
+    // ========== Name management ==================
     function addName() {
       const val = nameInput.value.trim();
       if (!val) return;
@@ -984,7 +893,6 @@
       if (seedParam && !isNaN(Number(seedParam))) {
         const seed = Number(seedParam);
         lastSeed = seed;
-        document.getElementById('verifySeed').value = seedParam;
         seedValueEl.textContent = seed;
         seedBox.classList.add('visible');
         showQrCode(seed);
