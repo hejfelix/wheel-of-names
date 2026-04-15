@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎡 Wheel of Names</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
 
@@ -428,6 +429,8 @@
           <div class="seed-label">🔑 RNG Seed (click to copy)</div>
           <div class="seed-value" id="seedValue" title="Click to copy"></div>
           <div class="seed-copy" id="seedCopyMsg">Click seed to copy to clipboard</div>
+          <div id="qrCode" style="margin-top:12px;display:flex;justify-content:center;"></div>
+          <div style="font-size:.75rem;color:#888;margin-top:4px;">Scan to reproduce this spin</div>
         </div>
       </div>
 
@@ -692,6 +695,30 @@
       return { index: index % names.length, name: names[index % names.length] };
     }
 
+    // ========== QR Code ==========
+    const BASE_URL = 'https://hejfelix.github.io/wheel-of-names/';
+
+    function showQrCode(seed) {
+      const qrContainer = document.getElementById('qrCode');
+      qrContainer.innerHTML = '';
+      const url = new URL(BASE_URL);
+      url.searchParams.set('names', names.join(','));
+      url.searchParams.set('seed', seed);
+      const qr = qrcode(0, 'M');
+      qr.addData(url.toString());
+      qr.make();
+      qrContainer.innerHTML = qr.createSvgTag({ cellSize: 3, margin: 2, scalable: true });
+      // Style the SVG white-on-transparent for dark theme
+      const svg = qrContainer.querySelector('svg');
+      if (svg) {
+        svg.style.width = '140px';
+        svg.style.height = '140px';
+        svg.style.background = '#fff';
+        svg.style.borderRadius = '8px';
+        svg.style.padding = '4px';
+      }
+    }
+
     // ========== Spin button state ==========
     function updateSpinBtnState() {
       spinBtn.disabled = lastSeed == null;
@@ -728,6 +755,7 @@
       // Show seed immediately on spin
       seedValueEl.textContent = seed;
       seedBox.classList.add('visible');
+      showQrCode(seed);
       seedCopyMsg.textContent = 'Click seed to copy to clipboard';
 
       const startAngle = currentAngle;
@@ -959,11 +987,12 @@
         document.getElementById('verifySeed').value = seedParam;
         seedValueEl.textContent = seed;
         seedBox.classList.add('visible');
+        showQrCode(seed);
       }
     }
 
     function buildShareUrl(includeSeed) {
-      const url = new URL(window.location.pathname, window.location.origin);
+      const url = new URL(BASE_URL);
       url.searchParams.set('names', names.join(','));
       if (includeSeed && lastSeed != null) {
         url.searchParams.set('seed', lastSeed);
